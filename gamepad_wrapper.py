@@ -1,11 +1,18 @@
-from evdev import InputDevice, categorize, ecodes
+from evdev import InputDevice, categorize, ecodes, list_devices
 import psutil
 from subprocess import Popen
 
 #creates object 'gamepad' to store the data
 #you can call it whatever you like
 # you will need to check /dev/input for your specific device name like eventXX
-gamepad = InputDevice('/dev/input/event15')
+
+
+devices = [InputDevice(path) for path in list_devices()]
+for device in devices:
+   if device.name == "Microntek              USB Joystick          ":
+      devicePath = device.path
+
+gamepad = InputDevice(devicePath)
 
 #button code variables (change to suit your device)
 # More information from https://core-electronics.com.au/tutorials/using-usb-and-bluetooth-controllers-with-python.html
