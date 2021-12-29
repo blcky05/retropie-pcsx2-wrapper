@@ -40,7 +40,7 @@ for event in gamepad.read_loop():
                 counter -= 1
     if counter <= 0:
         counter = 0
-    elif counter == 2:
+    elif counter >= 2:
         print("PS Button and Start Pressed")
         for process in psutil.process_iter():
             if procName in process.cmdline():
