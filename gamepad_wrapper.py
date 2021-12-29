@@ -1,26 +1,40 @@
 from evdev import InputDevice, categorize, ecodes, list_devices
 import psutil
-from subprocess import Popen
-
-#creates object 'gamepad' to store the data
-#you can call it whatever you like
-# you will need to check /dev/input for your specific device name like eventXX
 
 
-devices = [InputDevice(path) for path in list_devices()]
-for device in devices:
-   if device.name == "Microntek              USB Joystick          ":
-      devicePath = device.path
+############# Configuration ##############
 
-gamepad = InputDevice(devicePath)
+mode = "normal"  # change to debug for additional output
 
 #button code variables (change to suit your device)
 # More information from https://core-electronics.com.au/tutorials/using-usb-and-bluetooth-controllers-with-python.html
-button1 = 316
+# Change mode to debug to see your button presses (run script manually)
+button1 = 314
 button2 = 315
 
 # Process to look for to kill when BOTH keys are pressed
 procName = '/usr/games/PCSX2'
+
+
+############# Functionality ##############
+
+devices = [InputDevice(path) for path in list_devices()]
+devicePath = ""
+if mode == "debug":
+    print("Available devices:")
+for device in devices:
+    if mode == "debug":
+        print(device.name)
+    if device.name == "Xbox Wireless Controller":
+        devicePath = device.path
+
+if mode == "debug":
+    print("Chosen device path: ", devicePath)
+if devicePath == "":
+    print("Specified device not found. Exiting...")
+    exit()
+
+gamepad = InputDevice(devicePath)
 
 #loop and filter by event code and print the mapped label
 counter = 0
@@ -28,23 +42,32 @@ for event in gamepad.read_loop():
     if event.type == ecodes.EV_KEY:
         if event.value == 1:
             # Button pressed
-            print("pressed")
-            print(event.code)
+            if mode == "debug":
+                print("Button Pressed")
+                print(event.code)
+                if event.code in ecodes.KEY:
+                    print(ecodes.KEY[event.code])
             if event.code == button1 or event.code == button2:
                 counter += 1
         if event.value == 0:
             # Button released
-            print("released")
-            print(event.code)
+            if mode == "debug":
+                print("Button Released")
+                print(event.code)
+                if event.code in ecodes.KEY:
+                    print(ecodes.KEY[event.code])
             if event.code == button1 or event.code == button2:
                 counter -= 1
     if counter <= 0:
         counter = 0
     elif counter >= 2:
-        print("PS Button and Start Pressed")
+        if mode == "debug":
+            print("PS Button and Start Pressed")
         for process in psutil.process_iter():
             if procName in process.cmdline():
-                print('Process found. Terminating it.')
+                if mode == "debug":
+                    print('Process found. Terminating it.')
                 process.terminate()
+                print('Process terminated due to button event')
                 exit()
                 break
