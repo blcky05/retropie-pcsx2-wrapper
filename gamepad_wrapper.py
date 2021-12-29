@@ -23,18 +23,28 @@ button2 = 315
 procName = '/usr/games/PCSX2'
 
 #loop and filter by event code and print the mapped label
+counter = 0
 for event in gamepad.read_loop():
     if event.type == ecodes.EV_KEY:
         if event.value == 1:
-            # Button 1 pressed
-            if event.code == button1:
-                for event2 in gamepad.read_loop():
-                    # button 2 pressed
-                    if event2.code == button2:
-                        print("PS Button and Start Pressed")
-                        for process in psutil.process_iter():
-                            if procName in process.cmdline():
-                                print('Process found. Terminating it.')
-                                process.terminate()
-                                exit()
-                                break
+            # Button pressed
+            print("pressed")
+            print(event.code)
+            if event.code == button1 or event.code == button2:
+                counter += 1
+        if event.value == 0:
+            # Button released
+            print("released")
+            print(event.code)
+            if event.code == button1 or event.code == button2:
+                counter -= 1
+    if counter <= 0:
+        counter = 0
+    elif counter == 2:
+        print("PS Button and Start Pressed")
+        for process in psutil.process_iter():
+            if procName in process.cmdline():
+                print('Process found. Terminating it.')
+                process.terminate()
+                exit()
+                break
