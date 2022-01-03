@@ -34,6 +34,8 @@ config_file = os.path.dirname(os.path.abspath(__file__)) + "/" + config_file
 if os.path.isfile(config_file):
     with open(config_file, 'r') as json_config:
         json_data = json.load(json_config)
+        if "mode" in json_data:
+            mode = json_data["mode"]
         if "dev_config" in json_data:
             valid = True
             for entry in json_data["dev_config"].values():
@@ -44,12 +46,11 @@ if os.path.isfile(config_file):
             else:
                 print("Error parsing dev_config")
         if "proc_names" in json_data:
-            if argv[1] not in json_data["proc_names"].keys():
-                print("Specified application not configured. Exiting.")
-                exit()
-            procName = json_data["proc_names"][argv[1]]
-        if "mode" in json_data:
-            mode = json_data["mode"]
+            if not mode == "test":
+                if argv[1] not in json_data["proc_names"].keys():
+                    print("Specified application not configured. Exiting.")
+                    exit()
+                procName = json_data["proc_names"][argv[1]]
 else:
     print("No config file found! Using default values.")
 
@@ -60,10 +61,10 @@ available_devices = [InputDevice(path) for path in list_devices()]
 gamepads = {}
 buttons_pressed = []
 
-if mode == "debug":
+if mode == "debug" or mode == "test":
     print("Available devices:")
 for device in available_devices:
-    if mode == "debug":
+    if mode == "debug" or mode == "test":
         print(device.name, device.path)
     if device.name in dev_config.keys():
         gamepads[device.fd] = {
@@ -75,7 +76,7 @@ for device in available_devices:
 if len(gamepads.keys()) == 0:
     print("Specified device not found. Exiting...")
     exit()
-if mode == "debug":
+if mode == "debug" or mode == "test":
     print("Chosen device paths: ", *(gamepads[dev]["device"].path for dev in gamepads.keys()), sep='\n')
 
 active = True
@@ -86,7 +87,7 @@ while active:
             for event in gamepads[fd]["device"].read():
                 if event.type == ecodes.EV_KEY:
                     if event.value == 1:  # Button pressed
-                        if mode == "debug":
+                        if mode == "debug" or mode == "test":
                             print("Button pressed for device ", gamepads[fd]["device"].path)
                             print(event.code)
                             if event.code in ecodes.KEY:
@@ -99,7 +100,7 @@ while active:
                                 index = gamepads[fd]["buttons"].index(event.code)
                                 gamepads[fd]["buttons_pressed"][index] = True
                     elif event.value == 0:  # Button released
-                        if mode == "debug":
+                        if mode == "debug" or mode == "test":
                             print("Button released for device ", gamepads[fd]["device"].path)
                             print(event.code)
                             if event.code in ecodes.KEY:
@@ -114,17 +115,20 @@ while active:
                     # if all values are true, i.e. all buttons are pressed, terminate the application
                     if len([button for button in gamepads[fd]["buttons_pressed"] if button]) == len(
                             gamepads[fd]["buttons"]):
-                        if mode == "debug":
+                        if mode == "debug" or mode == "test":
                             print("PS button and terminate buttons pressed")
                         for process in psutil.process_iter():
                             if procName.lower() in [line.lower() for line in process.cmdline()]:
                                 if mode == "debug":
                                     print('Process found. Terminating it.')
-                                process.terminate()
-                                print('Process terminated due to button event')
-                                active = False
-                                exit()
-                                break
+                                if mode != "test":
+                                    process.terminate()
+                                    print('Process terminated due to button event')
+                                    active = False
+                                    exit()
+                                    break
+                                else:
+                                    print('Process found. We would terminate it now, but we are in test mode...')
     except Exception as e:
         print(e)
         active = False
