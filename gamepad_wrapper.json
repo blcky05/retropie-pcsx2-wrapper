@@ -1,0 +1,11 @@
+{
+	"dev_config": {
+		"Xbox Wireless Controller": {
+			"buttons": [158, 315]
+		}
+	},
+	"proc_names": {
+		"ps2": "/usr/games/PCSX2"
+	},
+	"mode": "normal"
+}

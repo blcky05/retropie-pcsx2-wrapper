@@ -3,6 +3,8 @@
 from evdev import InputDevice, categorize, ecodes, list_devices
 import psutil
 from select import select
+import json
+import os.path
 
 ############# Configuration ##############
 
@@ -21,6 +23,27 @@ dev_config["Xbox Wireless Controller"]["buttons"] = [158, 315]
 
 # Process to look for to kill when all keys are pressed
 procName = '/usr/games/PCSX2'
+
+config_file = "gamepad_wrapper.json"
+config_file = os.path.dirname(os.path.abspath(__file__)) + "/" + config_file
+if os.path.isfile(config_file):
+    with open(config_file, 'r') as json_config:
+        json_data = json.load(json_config)
+        if "dev_config" in json_data:
+            valid = True
+            for entry in json_data["dev_config"].values():
+                if not "buttons" in entry:
+                    valid = False
+            if valid:
+                dev_config = json_data["dev_config"]
+            else:
+                print("Error parsing dev_config")
+        if "proc_names" in json_data:
+            procName = json_data["proc_names"]["ps2"]
+        if "mode" in json_data:
+            mode = json_data["mode"]
+else:
+    print("No config file found! Using default values.")
 
 ############# Functionality ##############
 
