@@ -5,8 +5,13 @@ import psutil
 from select import select
 import json
 import os.path
+from sys import argv
 
 ############# Configuration ##############
+
+if len(argv) <= 1:
+    print("No application specified! Exiting.")
+    exit()
 
 mode = "normal"  # change to debug for additional output
 
@@ -39,11 +44,15 @@ if os.path.isfile(config_file):
             else:
                 print("Error parsing dev_config")
         if "proc_names" in json_data:
-            procName = json_data["proc_names"]["ps2"]
+            if argv[1] not in json_data["proc_names"].keys():
+                print("Specified application not configured. Exiting.")
+                exit()
+            procName = json_data["proc_names"][argv[1]]
         if "mode" in json_data:
             mode = json_data["mode"]
 else:
     print("No config file found! Using default values.")
+
 
 ############# Functionality ##############
 

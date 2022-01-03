@@ -1,5 +1,3 @@
 #!/bin/bash
-#only if for ps2, launch python wrapper script to catch hotkey assignments (for exiting the emu e.g.)
-if [ $1 = 'ps2' ]; then
-	/usr/bin/python3 /opt/retropie/configs/all/gamepad_wrapper.py &
-fi
+#launch the gampad wrapper script to terminate the emulator using a gamepad (if configured)
+/usr/bin/python3 /opt/retropie/configs/all/gamepad_wrapper.py $1 &
