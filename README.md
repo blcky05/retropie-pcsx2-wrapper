@@ -7,8 +7,9 @@ The specific usecase in mind: Some emulators do not allow to be exited with a ga
 
 
 ## Installation
-Copy (or better symlink) everything but the README to /opt/retropie/configs/all.
-Note: The config file must be present in the directory of the original python script, not the symlink.
+Copy (or better symlink) everything but the README to `/opt/retropie/configs/all`. If you already have runcommand scripts in use, you might consider
+the usage of my other project [retropie-runcommand-extender](https://github.com/blcky05/retropie-runcommand-extender), which allows you to use multiple runcommand scripts
+side-by-side.
 
 This Python script requires ```evdev```, ```psutil``` and ```json``` which can both be installed using pip
 
@@ -52,21 +53,15 @@ See the following commented example (this will not be usable, since comments are
 This bash script is executed by RetroArch when any ROM is loaded. This executes the gamepad_wrapper.py script and passes the platform as argument.
 
 ### gamepad_wrapper.py
-This Python script requires ```evdev``` and ```psutil``` and ```json``` which can both be installed using pip
+This Python script requires ```evdev``` and ```psutil``` and ```json``` which can all be installed using pip.
 
-This will start a Python listener using evdev that upon the specified key press will kill the specified app
+This will start a Python listener using evdev that upon the specified key press will kill the specified app.
 
-You may need to edit the following line 
-
-```gamepad = InputDevice('/dev/input/event19')```
-
-And edit /dev/input/event19 with whichever one your controller is recognized as
-
-When the specified key combo is pressed, it will kill the PCSX2 process, then RetroArch will run the runcommand-onend.sh script
+When the specified key combo is pressed, it will kill the PCSX2 process, then RetroArch will run the runcommand-onend.sh script.
 
 ### runcommand-onend.sh
-This Script is executed by RetroArch when the emulator exits and is only here to cleanup the Python wrapper process
+This Script is executed by RetroArch when the emulator exits and is only here to cleanup the Python wrapper process.
 
 ## Usage
-There should be nothing additional needed as these scripts should execute each time that RetroArch uses runcommand to launch an emulator
+There should be nothing additional needed as these scripts should execute each time that RetroArch uses runcommand to launch an emulator.
 
